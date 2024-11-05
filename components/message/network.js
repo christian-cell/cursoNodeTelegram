@@ -1,13 +1,26 @@
 const express = require('express');
+const multer = require('multer');
 const response = require('../../network/response');
 const controller = require('./controller');
 const router = express.Router();
+const path = require('path');
+
+const storage = multer.diskStorage({
+
+    destination: function(req, file, cb) {
+
+        cb(null, 'uploads/'); 
+    },
+    filename: function(req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const ext = path.extname(file.originalname);
+        cb(null, `${file.fieldname}-${uniqueSuffix}-${ext}`);
+    }
+});
+
+const upload = multer({ storage: storage });
 
 router.get('/',function(req,res){
-
-    /* console.log(JSON.stringify(req.headers));
-    res.header({ "custom-header":"Nuestro valor personalizado" });
-    response.success(req , res, 'lista de mensajes'); */
 
     const { query : { user } } = req || {};
 
@@ -25,11 +38,15 @@ router.get('/',function(req,res){
     })
 })
 
-router.post('/',function(req,res){
+router.post('/', upload.single('file'), function(req,res){
 
-    // const { body : {user , message} } = req || {};
+    const file = req.file;
 
-    controller.addMessage(req.body.user , req.body.message).then( ( fullMessage ) => {
+    console.log('Archivo subido:', file);
+
+    const { body : { chat ,user , message} } = req || {};
+
+    controller.addMessage( chat , user , message ).then( ( fullMessage ) => {
 
         response.success(req, res, fullMessage ,201);
     

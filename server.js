@@ -1,8 +1,6 @@
 const express = require('express');
 // import express from 'express'; EC6
-// require('./components/message/store');
-// Conectar a la base de datos
-const { connectDB } = require('./components/message/store');
+const connect = require('./db');
 
 // const connectDB = require('./components/message/store');
 const bodyParser = require('body-parser');
@@ -14,7 +12,7 @@ app.use(bodyParser.urlencoded({ extended : false }));
 app.use(bodyParser.json());
 app.use(bodyParser.json());
 
-connectDB();
+connect('mongodb://root:example@localhost:27017/telegram');
 
 router(app);
 
