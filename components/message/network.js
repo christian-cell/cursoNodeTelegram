@@ -9,7 +9,11 @@ router.get('/',function(req,res){
     res.header({ "custom-header":"Nuestro valor personalizado" });
     response.success(req , res, 'lista de mensajes'); */
 
-    controller.getMessages().then(( messageList ) => {
+    const { query : { user } } = req || {};
+
+    const filterMessages = user || null;
+
+    controller.getMessages( filterMessages ).then(( messageList ) => {
 
         response.success(req, res, messageList, 200);
     
@@ -17,7 +21,7 @@ router.get('/',function(req,res){
 
         console.log(`Unexpected error : ${error}`);
         
-        response.error(req, res, `Unexpected error : ${error}` , 500 , e);
+        response.error(req, res, `Unexpected error : ${error}` , 500 , error);
     })
 })
 
@@ -35,9 +39,33 @@ router.post('/',function(req,res){
     })
 })
 
-router.delete('/',function(req,res){
+router.patch('/:id' , function ( req , res ){
+
+    const { params : { id } , body : { message } } = req || {};
+
+
+    controller.updateMessage(id , message).then(( data ) => {
+
+        response.success(req, res, data, 200);
     
-    res.send('mensaje eliminado');
+    }).catch((error) => {
+
+        response.error(req, res, `Error interno , error : ${error}`, 500, error);
+    })
+})
+
+router.delete('/:id',function(req,res){
+
+    const { params : { id } } = req || {};
+    
+    controller.deleteMessage( id ).then(() => {
+
+        response.success(req , res, `Mensaje con id : ${id} eliminado` , 200);
+    
+    }).catch(( error ) => {
+
+        response.error(req, res, `Error interno , error : ${error}`, 500, error);
+    })
 })
 
 module.exports = router;
